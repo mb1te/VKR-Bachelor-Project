@@ -1,12 +1,22 @@
-from email.mime import base
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
 class DatasetScrapper:
+    """Сбор датасета"""
+
     base_url = "https://baza-otvetov.ru/categories/view/1/"
+    last_page = 316 #  последняя страница на сайте
 
     def get_page(self, page: int) -> list[tuple]:
+        """Парсинг одной страницы с вопросами
+
+        Args:
+            page (int): номер страницы
+
+        Returns:
+            list[tuple]: список из вопросов в виде (вопрос, правильный ответ, ответ 2, ответ 3, ответ 4)
+        """
         page_url = (page - 1) * 10
         destination_url = self.base_url
 
@@ -45,7 +55,16 @@ class DatasetScrapper:
 
         return dataset
 
-    def save_all(self, last_page=316, filename='quiz.csv') -> None:
+    def save_all(self, last_page=None, filename='quiz.csv') -> None:
+        """Сбор датасета из нескольких страницы
+
+        Args:
+            last_page (int, optional): последняя страница собранного датасета
+            filename (str, optional): название файла с датасетом
+        """
+        if last_page is None:
+            last_page = self.last_page
+
         dataset = []
         for page in range(1, last_page + 1):
             dataset += self.get_page(page)
