@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 import requests
 from html import unescape
 
+from config import API_KEY
+
 
 class SearchResult:
     """Сниппет из поисковой выдачи"""
@@ -34,7 +36,7 @@ class SearchClient:
             headers=cls.user_agent,
             params=dict(
                 query=term,
-                api_key=os.environ["API_KEY"],
+                api_key=API_KEY,
                 system=cls.system,
                 result_cnt=result_cnt
             ),
