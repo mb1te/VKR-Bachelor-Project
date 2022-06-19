@@ -32,7 +32,12 @@ async def answer(user_message: types.Message):
 
     logging.info(f'{message=}{question=}\n{choices=}\n{model_answer=}')
 
-    await user_message.answer(model_answer)
+    for ans in model_answer[::-1]:
+        if ans != '':
+            await user_message.answer(model_answer[1])
+            return
+
+    await user_message.answer('Не удалось однозначно определить ответ')
 
 async def on_startup(dp):
     logging.info('STARTUP')
