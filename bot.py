@@ -34,7 +34,7 @@ async def answer(user_message: types.Message):
 
     for ans in model_answer[::-1]:
         if ans != '':
-            await user_message.answer(model_answer[1])
+            await user_message.answer(ans)
             return
 
     await user_message.answer('Не удалось однозначно определить ответ')
