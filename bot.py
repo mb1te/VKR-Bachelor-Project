@@ -1,19 +1,23 @@
 import logging
-from aiogram import Bot, Dispatcher, executor, types
+
+from aiogram import Bot, types
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils.executor import start_polling
 
 from AnswerModel import AnswerModel
-from config import START_MESSAGE, TOKEN
+import config
 
-logging.basicConfig(level=logging.INFO)
 
 model = AnswerModel()
 
-bot = Bot(token=TOKEN)
+bot = Bot(token=config.TOKEN)
 dp = Dispatcher(bot)
+dp.middleware.setup(LoggingMiddleware())
 
 @dp.message_handler(commands=['start', 'help'])
 async def start(message: types.message):
-    await message.reply(START_MESSAGE)
+    await message.reply(config.START_MESSAGE)
 
 @dp.message_handler()
 async def answer(user_message: types.Message):
@@ -25,8 +29,20 @@ async def answer(user_message: types.Message):
         return
 
     model_answer = model.answer_question(question, choices)
-    await user_message.answer(model_answer[1])
 
+    logging.info(f'{message=}{question=}\n{choices=}\n{model_answer=}')
+
+    await user_message.answer(model_answer)
+
+async def on_startup(dp):
+    logging.info('STARTUP')
+    await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
+
+
+async def on_shutdown(dp):
+    logging.info('SHUTDOWN')
+    await bot.delete_webhook()
 
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    logging.basicConfig(level=logging.INFO)
+    start_polling(dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown)
